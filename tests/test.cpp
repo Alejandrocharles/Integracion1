@@ -1,49 +1,28 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
-#include "functions.h"
+#include <gtest/gtest.h>
 
-// Pruebas para readFile
-TEST_CASE("readFile - Leer contenido de archivo") {
-    std::string content = readFile("test_file.txt");
-    REQUIRE(content == "Esto es una prueba.\n");
+// Función que vamos a probar
+int suma(int a, int b) {
+    return a + b;
 }
 
-// Pruebas para contains
-TEST_CASE("contains - Buscar subcadenas") {
-    std::string text = "abcde";
-    std::string sub1 = "bcd";
-    std::string sub2 = "xyz";
-    size_t position;
-
-    SECTION("Subcadena encontrada") {
-        REQUIRE(contains(text, sub1, position));
-        REQUIRE(position == 2); // 1-indexado
-    }
-
-    SECTION("Subcadena no encontrada") {
-        REQUIRE_FALSE(contains(text, sub2, position));
-    }
+// Prueba de unidad para la función suma
+TEST(SumaTest, SumaPositivos) {
+    EXPECT_EQ(suma(2, 3), 5);  // Prueba de suma de dos números positivos
 }
 
-// Pruebas para findLongestPalindrome
-TEST_CASE("findLongestPalindrome - Palíndromo más largo") {
-    std::string text = "babad";
-
-    auto result = findLongestPalindrome(text);
-
-    REQUIRE(result.first.first == 1);  // Posición inicial (1-indexado)
-    REQUIRE(result.first.second == 3); // Posición final (1-indexado)
-    REQUIRE(result.second == "bab");  // Palíndromo encontrado
+TEST(SumaTest, SumaNegativos) {
+    EXPECT_EQ(suma(-1, -1), -2);  // Prueba de suma de dos números negativos
 }
 
-// Pruebas para findLongestCommonSubstring
-TEST_CASE("findLongestCommonSubstring - Subcadena común más larga") {
-    std::string s1 = "abcdef";
-    std::string s2 = "zcdemf";
+TEST(SumaTest, SumaPositivoNegativo) {
+    EXPECT_EQ(suma(5, -3), 2);  // Prueba de suma de un número positivo y uno negativo
+}
 
-    auto result = findLongestCommonSubstring(s1, s2);
+TEST(SumaTest, SumaCero) {
+    EXPECT_EQ(suma(0, 0), 0);  // Prueba de suma de dos ceros
+}
 
-    REQUIRE(result.first == 3); // Inicio (1-indexado)
-    REQUIRE(result.second == 4); // Final (1-indexado)
-    REQUIRE(s1.substr(result.first - 1, result.second - result.first + 1) == "cde");
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();  // Ejecuta todas las pruebas definidas
 }
