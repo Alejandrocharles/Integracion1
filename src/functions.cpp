@@ -1,5 +1,3 @@
-// functions.cpp
-
 #include "functions.h"
 #include <fstream>
 #include <iostream>
