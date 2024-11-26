@@ -1,75 +1,49 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include "functions.h" 
-#include <catch2/catch_test_macros.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+#include "functions.h"
 
-using namespace std;  
-
-string readFile(const string& filename) {
-    ifstream file(filename);
-    if (!file.is_open()) {
-        cerr << "Error al abrir el archivo: " << filename << endl;
-        exit(1);
-    }
-    string content((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
-    file.close();
-    return content;
+// Pruebas para readFile
+TEST_CASE("readFile - Leer contenido de archivo") {
+    std::string content = readFile("test_file.txt");
+    REQUIRE(content == "Esto es una prueba.\n");
 }
 
-void testContainsWithFiles() {
-    string transmission1 = readFile("transmission1.txt");
-    string transmission2 = readFile("transmission2.txt");
-    string mcode1 = readFile("mcode1.txt");
-    string mcode2 = readFile("mcode2.txt");
-    string mcode3 = readFile("mcode3.txt");
+// Pruebas para contains
+TEST_CASE("contains - Buscar subcadenas") {
+    std::string text = "abcde";
+    std::string sub1 = "bcd";
+    std::string sub2 = "xyz";
+    size_t position;
 
-    size_t position = 0;
-
-    cout << "Prueba de 'contains' con archivos:" << endl;
-
-    if (contains(transmission1, mcode1, position)) {
-        cout << "  Se encontró mcode1 en transmission1 en la posición: " << position << " - APROBADA\n";
-    } else {
-        cout << "  No se encontró mcode1 en transmission1 - FALLIDA\n";
+    SECTION("Subcadena encontrada") {
+        REQUIRE(contains(text, sub1, position));
+        REQUIRE(position == 2); // 1-indexado
     }
 
-    if (!contains(transmission2, mcode3, position)) {
-        cout << "  No se encontró mcode3 en transmission2 - APROBADA\n";
-    } else {
-        cout << "  Se encontró mcode3 en transmission2 en la posición: " << position << " - FALLIDA\n";
+    SECTION("Subcadena no encontrada") {
+        REQUIRE_FALSE(contains(text, sub2, position));
     }
 }
 
-void testFindLongestPalindromeWithFiles() {
-    string transmission1 = readFile("transmission1.txt");
-    string transmission2 = readFile("transmission2.txt");
+// Pruebas para findLongestPalindrome
+TEST_CASE("findLongestPalindrome - Palíndromo más largo") {
+    std::string text = "babad";
 
-    auto result1 = findLongestPalindrome(transmission1);
-    auto result2 = findLongestPalindrome(transmission2);
+    auto result = findLongestPalindrome(text);
 
-    cout << "Prueba de 'findLongestPalindrome' con archivos:" << endl;
-    cout << "  Palíndromo más largo en transmission1: " << result1.second
-         << " (Inicio: " << result1.first.first << ", Fin: " << result1.first.second << ") - APROBADA\n";
-    cout << "  Palíndromo más largo en transmission2: " << result2.second
-         << " (Inicio: " << result2.first.first << ", Fin: " << result2.first.second << ") - APROBADA\n";
+    REQUIRE(result.first.first == 1);  // Posición inicial (1-indexado)
+    REQUIRE(result.first.second == 3); // Posición final (1-indexado)
+    REQUIRE(result.second == "bab");  // Palíndromo encontrado
 }
 
-void testFindLongestCommonSubstringWithFiles() {
-    string transmission1 = readFile("transmission1.txt");
-    string transmission2 = readFile("transmission2.txt");
+// Pruebas para findLongestCommonSubstring
+TEST_CASE("findLongestCommonSubstring - Subcadena común más larga") {
+    std::string s1 = "abcdef";
+    std::string s2 = "zcdemf";
 
-    auto result = findLongestCommonSubstring(transmission1, transmission2);
+    auto result = findLongestCommonSubstring(s1, s2);
 
-    cout << "Prueba de 'findLongestCommonSubstring' con archivos:" << endl;
-    cout << "  Subcadena común más larga: "
-         << transmission1.substr(result.first - 1, result.second - result.first + 1)
-         << " (Inicio: " << result.first << ", Fin: " << result.second << ") - APROBADA\n";
-}
-
-int main() {
-    testContainsWithFiles();
-    testFindLongestPalindromeWithFiles();
-    testFindLongestCommonSubstringWithFiles();
-    return 0;
+    REQUIRE(result.first == 3); // Inicio (1-indexado)
+    REQUIRE(result.second == 4); // Final (1-indexado)
+    REQUIRE(s1.substr(result.first - 1, result.second - result.first + 1) == "cde");
 }
