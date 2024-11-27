@@ -1,19 +1,24 @@
-#ifndef FUNCTIONS_H
-#define FUNCTIONS_H
+#pragma once
 
 #include <string>
+#include <vector>
 #include <utility>
 
-// Declaración de la función para leer un archivo y devolver su contenido como una cadena de texto
-std::string readFile(const std::string& filename);
+namespace utils {
 
-// Declaración de la función para verificar si un código malicioso está contenido en una transmisión
-bool contains(const std::string& haystack, const std::string& needle, size_t& position);
+// Función para cargar contenido desde un archivo
+std::string cargarContenido(const std::string &rutaArchivo);
 
-// Declaración de la función para encontrar el palíndromo más largo en una cadena
-std::pair<std::pair<int, int>, std::string> findLongestPalindrome(const std::string& s);
+// Generar el arreglo LPS para el algoritmo de búsqueda de patrones
+void generarLPS(const std::string &modelo, std::vector<int> &lpsAuxiliar);
 
-// Declaración de la función para encontrar la subcadena más larga común entre dos cadenas
-std::pair<int, int> findLongestCommonSubstring(const std::string& s1, const std::string& s2);
+// Algoritmo de Knuth-Morris-Pratt para buscar un patrón en un texto
+bool buscarPatron(const std::string &texto, const std::string &modelo, size_t &ubicacion);
 
-#endif // FUNCTIONS_H
+// Encontrar el palíndromo más extenso dentro de una cadena
+std::pair<std::pair<int, int>, std::string> encontrarPalindromo(const std::string &cadena);
+
+// Encontrar el substring común más largo entre dos cadenas
+std::pair<std::pair<int, int>, std::string> substringComunLargo(const std::string &cadenaA, const std::string &cadenaB);
+
+} // namespace utils
