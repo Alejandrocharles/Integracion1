@@ -1,36 +1,43 @@
 #include <iostream>
 #include "functions.h"
 
+using namespace std;
+using namespace utils;
+
 int main() {
-    std::string transmission1 = readFile("transmission1.txt");
-    std::string transmission2 = readFile("transmission2.txt");
-    std::string mcode1 = readFile("mcode1.txt");
-    std::string mcode2 = readFile("mcode2.txt");
-    std::string mcode3 = readFile("mcode3.txt");
+    string trama1 = cargarContenido("transmission1.txt");
+    if (trama1.empty()) return 1;
 
-    // Parte 1: Verificar si el código malicioso está en las transmisiones
-    std::cout << "Parte 1" << std::endl;
-    size_t position;
-    std::cout << (contains(transmission1, mcode1, position) ? "true " + std::to_string(position) : "false") << std::endl;
-    std::cout << (contains(transmission1, mcode2, position) ? "true " + std::to_string(position) : "false") << std::endl;
-    std::cout << (contains(transmission1, mcode3, position) ? "true " + std::to_string(position) : "false") << std::endl;
-    std::cout << (contains(transmission2, mcode1, position) ? "true " + std::to_string(position) : "false") << std::endl;
-    std::cout << (contains(transmission2, mcode2, position) ? "true " + std::to_string(position) : "false") << std::endl;
-    std::cout << (contains(transmission2, mcode3, position) ? "true " + std::to_string(position) : "false") << std::endl;
+    string trama2 = cargarContenido("transmission2.txt");
+    if (trama2.empty()) return 1;
 
-    // Parte 2: Encontrar el palíndromo más largo en los archivos de transmisión
-    std::cout << "\n" <<  "Parte 2" << std::endl;
-    std::pair<std::pair<int, int>, std::string> palindromeTransmission1 = findLongestPalindrome(transmission1);
-    std::pair<std::pair<int, int>, std::string> palindromeTransmission2 = findLongestPalindrome(transmission2);
+    string codigo1 = cargarContenido("mcode1.txt");
+    if (codigo1.empty()) return 1;
 
-    std::cout << palindromeTransmission1.first.first << " " << palindromeTransmission1.first.second << " " << palindromeTransmission1.second << std::endl;
-    std::cout << palindromeTransmission2.first.first << " " << palindromeTransmission2.first.second << " " << palindromeTransmission2.second << std::endl;
+    string codigo2 = cargarContenido("mcode2.txt");
+    if (codigo2.empty()) return 1;
 
-    // Parte 3: Encontrar la subcadena común más larga entre las transmisiones
-    std::cout << "Parte 3" << std::endl;
-    std::pair<int, int> longestCommonSubstring = findLongestCommonSubstring(transmission1, transmission2);
-    std::cout << longestCommonSubstring.first << " " << longestCommonSubstring.second << " ";
-    std::cout << transmission1.substr(longestCommonSubstring.first - 1, longestCommonSubstring.second - longestCommonSubstring.first + 1) << std::endl;
+    string codigo3 = cargarContenido("mcode3.txt");
+    if (codigo3.empty()) return 1;
+
+    size_t indice;
+    cout << "Parte 1: Verificación de códigos maliciosos:\n";
+    cout << (buscarPatron(trama1, codigo1, indice) ? "true " + to_string(indice + 1) : "false") << endl;
+    cout << (buscarPatron(trama1, codigo2, indice) ? "true " + to_string(indice + 1) : "false") << endl;
+    cout << (buscarPatron(trama1, codigo3, indice) ? "true " + to_string(indice + 1) : "false") << endl;
+    cout << (buscarPatron(trama2, codigo1, indice) ? "true " + to_string(indice + 1) : "false") << endl;
+    cout << (buscarPatron(trama2, codigo2, indice) ? "true " + to_string(indice + 1) : "false") << endl;
+    cout << (buscarPatron(trama2, codigo3, indice) ? "true " + to_string(indice + 1) : "false") << endl;
+
+    auto palindromo1 = encontrarPalindromo(trama1);
+    auto palindromo2 = encontrarPalindromo(trama2);
+    cout << "Parte 2: Palíndromo más largo:\n";
+    cout << palindromo1.first.first + 1 << " " << palindromo1.first.second + 1 << " " << palindromo1.second << endl;
+    cout << palindromo2.first.first + 1 << " " << palindromo2.first.second + 1 << " " << palindromo2.second << endl;
+
+    auto subCadenaComun = substringComunLargo(trama1, trama2);
+    cout << "Parte 3: Substring común más largo:\n";
+    cout << subCadenaComun.first.first << " " << subCadenaComun.first.second << " " << subCadenaComun.second << endl;
 
     return 0;
 }
