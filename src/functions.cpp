@@ -1,90 +1,130 @@
 #include "functions.h"
-#include <fstream>
 #include <iostream>
-#include <vector>
+#include <fstream>
 
-// Función para leer un archivo y devolver su contenido como una cadena de texto
-std::string readFile(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        exit(1);
+namespace utils {
+
+std::string cargarContenido(const std::string &rutaArchivo) {
+    std::ifstream entrada(rutaArchivo);
+    if (!entrada) {
+        std::cerr << "No se pudo abrir el archivo: " << rutaArchivo << std::endl;
+        return "";
     }
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
-    return content;
+    return std::string((std::istreambuf_iterator<char>(entrada)), std::istreambuf_iterator<char>());
 }
 
-// Función para verificar si un código malicioso está contenido en una transmisión
-bool contains(const std::string& haystack, const std::string& needle, size_t& position) {
-    size_t pos = haystack.find(needle);
-    if (pos != std::string::npos) {
-        position = pos + 1;  // Convertir a 1-indexado
-        return true;
+void generarLPS(const std::string &modelo, std::vector<int> &lpsAuxiliar) {
+    int largoActual = 0;
+    size_t idx = 1;
+    lpsAuxiliar[0] = 0;
+
+    while (idx < modelo.length()) {
+        if (modelo[idx] == modelo[largoActual]) {
+            largoActual++;
+            lpsAuxiliar[idx] = largoActual;
+            idx++;
+        } else {
+            if (largoActual != 0) {
+                largoActual = lpsAuxiliar[largoActual - 1];
+            } else {
+                lpsAuxiliar[idx] = 0;
+                idx++;
+            }
+        }
+    }
+}
+
+bool buscarPatron(const std::string &texto, const std::string &modelo, size_t &ubicacion) {
+    int tamTexto = texto.length();
+    int tamModelo = modelo.length();
+    std::vector<int> lps(tamModelo, 0);
+    generarLPS(modelo, lps);
+
+    int i = 0, j = 0;
+    while (i < tamTexto) {
+        if (modelo[j] == texto[i]) {
+            i++;
+            j++;
+        }
+        if (j == tamModelo) {
+            ubicacion = i - j;
+            return true;
+        } else if (i < tamTexto && modelo[j] != texto[i]) {
+            if (j != 0) {
+                j = lps[j - 1];
+            } else {
+                i++;
+            }
+        }
     }
     return false;
 }
 
-// Función para encontrar el palíndromo más largo en una cadena
-std::pair<std::pair<int, int>, std::string> findLongestPalindrome(const std::string& s) {
-    int n = s.length();
-    int start = 0, maxLength = 1;
-    std::vector<std::vector<bool>> table(n, std::vector<bool>(n, false));
-
-    // Cada carácter individual es un palíndromo
-    for (int i = 0; i < n; ++i) {
-        table[i][i] = true;
+std::pair<std::pair<int, int>, std::string> encontrarPalindromo(const std::string &cadena) {
+    int longitud = cadena.size();
+    if (longitud == 0) {
+        return {{0, 0}, ""};
     }
 
-    // Buscar palíndromos de longitud 2
-    for (int i = 0; i < n - 1; ++i) {
-        if (s[i] == s[i + 1]) {
-            table[i][i + 1] = true;
-            start = i;
-            maxLength = 2;
+    std::pair<int, int> posicion = {0, 0};
+    int tamMax = 1;
+    std::string resultadoPalindromo = cadena.substr(0, 1);
+
+    for (int centro = 0; centro < longitud; ++centro) {
+        int izquierda = centro, derecha = centro;
+        while (izquierda >= 0 && derecha < longitud && cadena[izquierda] == cadena[derecha]) {
+            if (derecha - izquierda + 1 > tamMax) {
+                tamMax = derecha - izquierda + 1;
+                posicion = {izquierda, derecha};
+                resultadoPalindromo = cadena.substr(izquierda, derecha - izquierda + 1);
+            }
+            izquierda--;
+            derecha++;
+        }
+
+        izquierda = centro, derecha = centro + 1;
+        while (izquierda >= 0 && derecha < longitud && cadena[izquierda] == cadena[derecha]) {
+            if (derecha - izquierda + 1 > tamMax) {
+                tamMax = derecha - izquierda + 1;
+                posicion = {izquierda, derecha};
+                resultadoPalindromo = cadena.substr(izquierda, derecha - izquierda + 1);
+            }
+            izquierda--;
+            derecha++;
         }
     }
 
-    // Buscar palíndromos de longitud mayor
-    for (int len = 3; len <= n; ++len) {
-        for (int i = 0; i < n - len + 1; ++i) {
-            int j = i + len - 1;
-            if (s[i] == s[j] && table[i + 1][j - 1]) {
-                table[i][j] = true;
-                if (len > maxLength) {
-                    start = i;
-                    maxLength = len;
+    return {posicion, resultadoPalindromo};
+}
+
+std::pair<std::pair<int, int>, std::string> substringComunLargo(const std::string &cadenaA, const std::string &cadenaB) {
+    int tamA = cadenaA.size(), tamB = cadenaB.size();
+    if (tamA == 0 || tamB == 0) {
+        return {{0, 0}, ""};
+    }
+
+    std::vector<std::vector<int>> tablaDP(tamA + 1, std::vector<int>(tamB + 1, 0));
+    int tamMayor = 0, finPosA = 0;
+    std::string subCadena;
+
+    for (int i = 1; i <= tamA; ++i) {
+        for (int j = 1; j <= tamB; ++j) {
+            if (cadenaA[i - 1] == cadenaB[j - 1]) {
+                tablaDP[i][j] = tablaDP[i - 1][j - 1] + 1;
+                if (tablaDP[i][j] > tamMayor) {
+                    tamMayor = tablaDP[i][j];
+                    finPosA = i;
+                    subCadena = cadenaA.substr(i - tamMayor, tamMayor);
                 }
             }
         }
     }
 
-    std::string palindrome = s.substr(start, maxLength);
-    return {{start + 1, start + maxLength}, palindrome};  // Convertir a 1-indexado
-}
-
-// Función para encontrar la subcadena más larga común entre dos cadenas
-std::pair<int, int> findLongestCommonSubstring(const std::string& s1, const std::string& s2) {
-    int n1 = s1.length();
-    int n2 = s2.length();
-    std::vector<std::vector<int>> dp(n1 + 1, std::vector<int>(n2 + 1, 0));
-
-    int maxLength = 0;
-    int endPos = 0;
-
-    // Llenar la tabla DP
-    for (int i = 1; i <= n1; ++i) {
-        for (int j = 1; j <= n2; ++j) {
-            if (s1[i - 1] == s2[j - 1]) {
-                dp[i][j] = dp[i - 1][j - 1] + 1;
-                if (dp[i][j] > maxLength) {
-                    maxLength = dp[i][j];
-                    endPos = i - 1;
-                }
-            }
-        }
+    if (tamMayor == 0) {
+        return {{0, 0}, ""};
     }
 
-    int startPos = endPos - maxLength + 1;
-    return {startPos + 1, endPos + 1};  // Convertir a 1-indexado
+    return {{finPosA - tamMayor + 1, finPosA}, subCadena};
 }
+
+} // namespace utils
